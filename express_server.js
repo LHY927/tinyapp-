@@ -32,6 +32,11 @@ app.get("/urls.json", (req, res) => {
     res.json(urlDatabase);
 });
 
+app.get("/u/:id", (req, res) => {
+    const longURL = req.params.id;
+    res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
     console.log(req.body); // Log the POST request body to the console
     res.send("Ok"); // Respond with 'Ok' (we will replace this)
