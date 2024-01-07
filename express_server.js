@@ -15,7 +15,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    const templateVars = { urls: urlDatabase };
+    console.log(req.cookies)
+    const templateVars = {
+      username: undefined,
+      urls: urlDatabase
+    };
+    if(req.cookies != undefined){
+        templateVars["username"] = req.cookies["username"];
+    }
     res.render("urls_index", templateVars);
 });
 
