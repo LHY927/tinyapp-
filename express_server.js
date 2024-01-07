@@ -37,13 +37,21 @@ app.get("/u/:id", (req, res) => {
     res.redirect(longURL);
 });
 
-app.post("/urls", (req, res) => {
-    console.log(req.body); // Log the POST request body to the console
-    res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
-
 app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.post("/urls", (req, res) => {
+    urlDatabase[generateRandomString()] = req.body.longURL;
+    console.log(req.body); // Log the POST request body to the console
+    res.redirect("/urls");
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+    if(req.params.id in urlDatabase){
+        delete urlDatabase[req.params.id];
+    }
+    res.redirect("/urls");
 });
 
 function generateRandomString() {
