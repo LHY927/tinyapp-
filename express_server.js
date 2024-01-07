@@ -68,9 +68,12 @@ app.post("/urls/:id/delete", (req, res) => {
     res.redirect("/urls");
 });
 
-
 app.post("/login", (req, res) => {
     res.cookie("username", req.body.username).redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+    res.clearCookie("username").redirect("/urls");
 });
 
 function generateRandomString() {
