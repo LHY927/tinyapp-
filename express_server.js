@@ -48,6 +48,8 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+    console.log(req.params.id)
+    console.log(req.params.id in urlDatabase)
     if(req.params.id in urlDatabase){
         delete urlDatabase[req.params.id];
     }
