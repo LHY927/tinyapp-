@@ -48,8 +48,6 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-    console.log(req.params.id)
-    console.log(req.params.id in urlDatabase)
     if(req.params.id in urlDatabase){
         urlDatabase[req.params.id] = req.body.longURL;
     }
@@ -57,12 +55,15 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-    console.log(req.params.id)
-    console.log(req.params.id in urlDatabase)
     if(req.params.id in urlDatabase){
         delete urlDatabase[req.params.id];
     }
     res.redirect("/urls");
+});
+
+
+app.post("/login", (req, res) => {
+    res.cookie("username", req.body.username).redirect("/urls");
 });
 
 function generateRandomString() {
