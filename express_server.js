@@ -132,7 +132,23 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
     if(req.params.id in urlDatabase){
+        if(req.headers.cookie != undefined){
+            //if can access cookie
+            if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+                //if haven't logged in
+                res.redirect("/login");
+                return;
+            }else if(urlDatabase[req.params.id].userID 
+                != req.headers.cookie.split('=')[1]){
+                //if do not own the URL
+                res.status(403).send("The URL does not owned by the user ID")
+                return;
+            }
+        }
         urlDatabase[req.params.id].longURL = req.body.longURL;
+    }else{
+        res.status(400).send("id does not exist");
+        return;
     }
 
     res.redirect("/urls");
@@ -140,8 +156,25 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
     if(req.params.id in urlDatabase){
+        if(req.headers.cookie != undefined){
+            //if can access cookie
+            if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+                //if haven't logged in
+                res.redirect("/login");
+                return;
+            }else if(urlDatabase[req.params.id].userID 
+                != req.headers.cookie.split('=')[1]){
+                //if do not own the URL
+                res.status(403).send("The URL does not owned by the user ID")
+                return;
+            }
+        }
         delete urlDatabase[req.params.id];
+    }else{
+        res.status(400).send("id does not exist");
+        return;
     }
+    
     res.redirect("/urls");
 });
 
