@@ -49,6 +49,10 @@ app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/register", (req, res) => {
+    res.render("register");
+});
+
 app.post("/urls", (req, res) => {
     urlDatabase[generateRandomString()] = req.body.longURL;
     console.log(req.body); // Log the POST request body to the console
