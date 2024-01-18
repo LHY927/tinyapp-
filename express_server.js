@@ -87,13 +87,23 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    console.log(req.body.username);
-    res.cookie("username", req.body.username).redirect("/urls");
+    console.log(req.body.email);
+    console.log(req.body.password);
+
+    const user = usersContainEmail(req.body.email);
+    console.log(user);
+    if(user == false){
+        res.status(403).send("Does not exist user that registered with the email, please try another email.");
+    }else if(user["password"] != req.body.password){
+        res.status(403).send("Password does not match.");
+    }else{
+        res.cookie("user_id", user.id).redirect("/urls");
+    }
 });
 
 app.post("/logout", (req, res) => {
     console.log(req.body.username);
-    res.clearCookie("user_id").redirect("/urls");
+    res.clearCookie("user_id").redirect("/login");
 });
 
 app.post("/register", (req, res) => {
@@ -101,13 +111,11 @@ app.post("/register", (req, res) => {
     console.log(req.body.password);
     if(req.body.email.length == 0 || req.body.password.length == 0){
         res.status(400).send("email and passwords are required fields");
-    }else{
-        for(const user in users){
-            if(req.body.email == users[user].email){
-                res.status(400).send("email exist, please register with other email");
-            }
-        }
+        return;
+    }else if(usersContainEmail(req.body.email)){
+        return
     }
+    
     const user_id = generateRandomString();
     users[user_id] = {
         id: user_id,
@@ -129,6 +137,15 @@ function generateRandomString() {
       counter += 1;
     }
     return result;
+}
+
+function usersContainEmail(email){
+    for(const user in users){
+        if(email == users[user].email){
+            return users[user];
+        }
+    }
+    return false;
 }
 
 app.listen(PORT, () => {
