@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+var cookies = require("cookie-parser");
 const PORT = 8080;
 
 app.set("view engine", "ejs");
@@ -15,13 +16,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    console.log(req.cookies)
+    console.log(req.headers.cookie.split('=')[1])
     const templateVars = {
       username: undefined,
       urls: urlDatabase
     };
-    if(req.cookies != undefined){
-        templateVars["username"] = req.cookies["username"];
+    if(req.headers.cookie != undefined){
+        templateVars["username"] = req.headers.cookie.split('=')[1];
     }
     res.render("urls_index", templateVars);
 });
@@ -69,6 +70,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+    console.log(req.body.username)
     res.cookie("username", req.body.username).redirect("/urls");
 });
 
