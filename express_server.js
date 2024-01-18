@@ -130,7 +130,10 @@ app.post("/urls", (req, res) => {
             return;
         }
     }
-    urlDatabase[generateRandomString()].longURL = req.body.longURL;
+    url_id = generateRandomString();
+    urlDatabase[url_id] = {};
+    urlDatabase[url_id].longURL = req.body.longURL;
+    urlDatabase[url_id].userID = req.session.user_id;
     console.log(req.body); // Log the POST request body to the console
     res.redirect("/urls");
 });
@@ -185,7 +188,7 @@ app.post("/login", (req, res) => {
     console.log(req.body.email);
     console.log(req.body.password);
 
-    const user = usersContainEmail(req.body.email);
+    const user = getUserByEmail(req.body.email, users);
     console.log(user);
     if(user == false){
         //userContainEmail return false if the user does not exist
@@ -200,7 +203,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
     console.log(req.body.user_id);
-    res.clearCookie("session");
+    req.session['user_id'] = null;
     res.redirect("/login");
 });
 
@@ -210,7 +213,7 @@ app.post("/register", (req, res) => {
     if(req.body.email.length == 0 || req.body.password.length == 0){
         res.status(400).send("email and passwords are required fields");
         return;
-    }else if(usersContainEmail(req.body.email)){
+    }else if(getUserByEmail(req.body.email, users)){
         //userContainEmail will return the user object if exist
         //In that case, return as the user already exist.
         return
@@ -227,7 +230,7 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
 });
 
-function generateRandomString() {
+const generateRandomString = function() {
     const length = 6;
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -240,18 +243,18 @@ function generateRandomString() {
     return result;
 }
 
-function usersContainEmail(email){
-    for(const user in users){
-        if(email == users[user].email){
+const getUserByEmail = function(email, database) {
+    for(const user in database){
+        if(email == database[user].email){
             //return the user object if found
-            return users[user];
+            return database[user];
         }
     }
     //return false if not found
     return false;
 }
 
-function urlsForUser(id){
+const urlsForUser = function(id){
     const result = {};
     console.log("urlsForUser:")
     for(const item in urlDatabase){
