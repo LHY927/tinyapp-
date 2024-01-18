@@ -1,3 +1,4 @@
+const helpers = require('./helpers');
 const express = require("express");
 var cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
@@ -188,7 +189,7 @@ app.post("/login", (req, res) => {
     console.log(req.body.email);
     console.log(req.body.password);
 
-    const user = getUserByEmail(req.body.email, users);
+    const user = helpers(req.body.email, users);
     console.log(user);
     if(user == false){
         //userContainEmail return false if the user does not exist
@@ -213,7 +214,7 @@ app.post("/register", (req, res) => {
     if(req.body.email.length == 0 || req.body.password.length == 0){
         res.status(400).send("email and passwords are required fields");
         return;
-    }else if(getUserByEmail(req.body.email, users)){
+    }else if(helpers(req.body.email, users)){
         //userContainEmail will return the user object if exist
         //In that case, return as the user already exist.
         return
@@ -241,17 +242,6 @@ const generateRandomString = function() {
       counter += 1;
     }
     return result;
-}
-
-const getUserByEmail = function(email, database) {
-    for(const user in database){
-        if(email == database[user].email){
-            //return the user object if found
-            return database[user];
-        }
-    }
-    //return false if not found
-    return false;
 }
 
 const urlsForUser = function(id){
