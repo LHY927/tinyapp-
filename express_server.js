@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 const urlDatabase = {
     b6UTxQ: {
       longURL: "https://www.tsn.ca",
-      userID: "aJ48lW",
+      userID: "AAXA4n",
     },
     i3BoGr: {
       longURL: "https://www.google.ca",
@@ -21,6 +21,11 @@ const users = {
       id: "AAXA4n",
       email: "user@example.com",
       password: "purple-monkey-dinosaur",
+    },
+    aJ48lW: {
+        id: "aJ48lW",
+        email: "user1@example.com",
+        password: "purple1-monkey-dinosaur",
     }
 };
 
@@ -33,12 +38,16 @@ app.get("/urls", (req, res) => {
     // console.log(users)
     const templateVars = {
       user: undefined,
-      urls: urlDatabase
+      urls: undefined
     };
     if(req.headers.cookie != undefined){
         console.log(users[req.headers.cookie.split('=')[1]]);
         templateVars["user"] = users[req.headers.cookie.split('=')[1]];
+        templateVars["urls"] = urlsForUser(req.headers.cookie.split('=')[1]);
     }
+
+    console.log("Send to urls")
+    console.log(templateVars)
     res.render("urls_index", templateVars);
 });
 
@@ -55,6 +64,18 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
     if(!(req.params.id in urlDatabase)){
         res.status(400).send("The shortened ID does not exist.");
+    }else if(req.headers.cookie != undefined){
+        //if can access cookie
+        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+            //if haven't logged in
+            res.redirect("/login");
+            return;
+        }else if(urlDatabase[req.params.id].userID 
+            != req.headers.cookie.split('=')[1]){
+            //if do not own the URL
+            res.status(403).send("The URL does not owned by the user ID")
+            return;
+        }
     }
 
     const templateVars = { 
@@ -189,6 +210,20 @@ function usersContainEmail(email){
     }
     //return false if not found
     return false;
+}
+
+function urlsForUser(id){
+    const result = {};
+    console.log("urlsForUser:")
+    for(const item in urlDatabase){
+        console.log(urlDatabase[item]);
+        console.log(id);
+        if(urlDatabase[item].userID == id){
+            result[item] = urlDatabase[item];
+        }
+    }
+    console.log(result);
+    return result;
 }
 
 app.listen(PORT, () => {

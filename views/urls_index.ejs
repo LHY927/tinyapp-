@@ -20,6 +20,7 @@
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
+      <% if (typeof user != 'undefined') { %>
       <table class="table">
         <thead>
           <tr>
@@ -48,6 +49,9 @@
           <% } %>
         </tbody>
       </table>
+      <% } else { %>
+        <p>Please login to view URLs</p>
+      <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script

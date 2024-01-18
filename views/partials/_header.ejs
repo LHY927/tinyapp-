@@ -19,7 +19,7 @@
           <% if (typeof user == 'undefined') { %>
             <a class="btn btn-primary" href="/login">Login</a>
             <a class="btn btn-primary" href="/register">Register</a>
-            <% } else { %>
+          <% } else { %>
           <form action="/logout" method="POST">
             <p>Logged in as: <%= user["email"] %></p>
             <button type="submit" class="btn btn-primary">Logout</button>
