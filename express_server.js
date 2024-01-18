@@ -1,10 +1,15 @@
 const express = require("express");
+var cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieSession({
+    name: 'session',
+    keys: ['key1', 'key2']
+  }))
 
 const urlDatabase = {
     b6UTxQ: {
@@ -41,10 +46,10 @@ app.get("/urls", (req, res) => {
       user: undefined,
       urls: undefined
     };
-    if(req.headers.cookie != undefined){
-        console.log(users[req.headers.cookie.split('=')[1]]);
-        templateVars["user"] = users[req.headers.cookie.split('=')[1]];
-        templateVars["urls"] = urlsForUser(req.headers.cookie.split('=')[1]);
+    if(req.session.user_id != undefined){
+        console.log(users[req.session.user_id]);
+        templateVars["user"] = users[req.session.user_id];
+        templateVars["urls"] = urlsForUser(req.session.user_id);
     }
 
     console.log("Send to urls")
@@ -53,8 +58,8 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-    if(req.headers.cookie != undefined){
-        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+    if(req.session.user_id != undefined){
+        if (typeof users[req.session.user_id] == 'undefined'){
             res.redirect("/login");
             return;
         }
@@ -65,14 +70,13 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
     if(!(req.params.id in urlDatabase)){
         res.status(400).send("The shortened ID does not exist.");
-    }else if(req.headers.cookie != undefined){
+    }else if(req.session.user_id != undefined){
         //if can access cookie
-        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+        if (typeof users[req.session.user_id] == 'undefined'){
             //if haven't logged in
             res.redirect("/login");
             return;
-        }else if(urlDatabase[req.params.id].userID 
-            != req.headers.cookie.split('=')[1]){
+        }else if(urlDatabase[req.params.id].userID != req.session.user_id){
             //if do not own the URL
             res.status(403).send("The URL does not owned by the user ID")
             return;
@@ -100,8 +104,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-    if(req.headers.cookie != undefined){
-        if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
+    if(req.session.user_id != undefined){
+        if (typeof users[req.session.user_id] != 'undefined'){
             res.redirect("/urls");
             return;
         }
@@ -110,8 +114,8 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-    if(req.headers.cookie != undefined){
-        if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
+    if(req.session.user_id != undefined){
+        if (typeof users[req.session.user_id] != 'undefined'){
             res.redirect("/urls");
             return;
         }
@@ -120,8 +124,8 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-    if(req.headers.cookie != undefined){
-        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+    if(req.session.user_id != undefined){
+        if (typeof users[req.session.user_id] == 'undefined'){
             res.status(403).send("Please login to shorten URLs.");
             return;
         }
@@ -133,14 +137,13 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
     if(req.params.id in urlDatabase){
-        if(req.headers.cookie != undefined){
+        if(req.session.user_id != undefined){
             //if can access cookie
-            if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+            if (typeof users[req.session.user_id] == 'undefined'){
                 //if haven't logged in
                 res.redirect("/login");
                 return;
-            }else if(urlDatabase[req.params.id].userID 
-                != req.headers.cookie.split('=')[1]){
+            }else if(urlDatabase[req.params.id].userID != req.session.user_id){
                 //if do not own the URL
                 res.status(403).send("The URL does not owned by the user ID")
                 return;
@@ -157,14 +160,13 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
     if(req.params.id in urlDatabase){
-        if(req.headers.cookie != undefined){
+        if(req.session.user_id != undefined){
             //if can access cookie
-            if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+            if (typeof users[req.session.user_id] == 'undefined'){
                 //if haven't logged in
                 res.redirect("/login");
                 return;
-            }else if(urlDatabase[req.params.id].userID 
-                != req.headers.cookie.split('=')[1]){
+            }else if(urlDatabase[req.params.id].userID != req.session.user_id){
                 //if do not own the URL
                 res.status(403).send("The URL does not owned by the user ID")
                 return;
@@ -191,18 +193,20 @@ app.post("/login", (req, res) => {
     }else if(!bcrypt.compareSync(req.body.password, user["password"])){
         res.status(403).send("Password does not match.");
     }else{
-        res.cookie("user_id", user.id).redirect("/urls");
+        req.session.user_id = user.id;
+        res.redirect("/urls");
     }
 });
 
 app.post("/logout", (req, res) => {
     console.log(req.body.user_id);
-    res.clearCookie("user_id").redirect("/login");
+    res.clearCookie("session");
+    res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
-    console.log(req.body.email);
-    console.log(req.body.password);
+    console.log(req);
+    //console.log(req.body.password);
     if(req.body.email.length == 0 || req.body.password.length == 0){
         res.status(400).send("email and passwords are required fields");
         return;
@@ -219,7 +223,8 @@ app.post("/register", (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10)
       }
     console.log(users);
-    res.cookie("user_id", user_id).redirect("/urls");
+    req.session.user_id = user_id;
+    res.redirect("/urls");
 });
 
 function generateRandomString() {
