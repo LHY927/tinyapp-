@@ -23,8 +23,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    console.log(req.headers.cookie.split('=')[1])
-    console.log(users)
+    // console.log(req.headers.cookie.split('=')[1])
+    // console.log(users)
     const templateVars = {
       user: undefined,
       urls: urlDatabase
@@ -89,12 +89,21 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
     console.log(req.body.username);
-    res.clearCookie("username").redirect("/urls");
+    res.clearCookie("user_id").redirect("/urls");
 });
 
 app.post("/register", (req, res) => {
     console.log(req.body.email);
     console.log(req.body.password);
+    if(req.body.email.length == 0 || req.body.password.length == 0){
+        res.status(400).send("email and passwords are required fields");
+    }else{
+        for(const user in users){
+            if(req.body.email == users[user].email){
+                res.status(400).send("email exist, please register with other email");
+            }
+        }
+    }
     const user_id = generateRandomString();
     users[user_id] = {
         id: user_id,
