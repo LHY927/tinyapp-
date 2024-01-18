@@ -47,7 +47,14 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+    if(!(req.params.id in urlDatabase)){
+        res.status(400).send("The shortened ID does not exist.");
+    }
+
+    const templateVars = { 
+        id: req.params.id, 
+        longURL: urlDatabase[req.params.id] 
+    };
     res.render("urls_show", templateVars);
 });
 
@@ -56,7 +63,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-    const longURL = req.params.id;
+    const longURL = urlDatabase[req.params.id];
     res.redirect(longURL);
 });
 
@@ -100,6 +107,7 @@ app.post("/urls/:id", (req, res) => {
     if(req.params.id in urlDatabase){
         urlDatabase[req.params.id] = req.body.longURL;
     }
+
     res.redirect("/urls");
 });
 
