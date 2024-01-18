@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    console.log(req.headers.cookie.split('=')[1])
+    //console.log(req.headers.cookie.split('=')[1])
     const templateVars = {
       username: undefined,
       urls: urlDatabase
@@ -75,6 +75,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+    console.log(req.body.username)
     res.clearCookie("username").redirect("/urls");
 });
 

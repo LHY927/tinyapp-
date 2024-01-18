@@ -27,9 +27,9 @@
             <button type="submit" class="btn btn-primary">login</button>
           </form>
           <% } else { %>
-          <form action="/logout" method="POST"></form>
+          <form action="/logout" method="POST">
             <p>Logged in as: <%= username %></p>
-            <button type="submit" class="btn btn-primary">Logout</button>
+            <button type="submit" class="btn btn-primary">logout</button>
           </form>
           <% } %>
         </div>
