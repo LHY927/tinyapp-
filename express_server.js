@@ -6,8 +6,14 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+    b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW",
+    },
+    i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW",
+    },
 };
 
 const users = {
@@ -53,7 +59,7 @@ app.get("/urls/:id", (req, res) => {
 
     const templateVars = { 
         id: req.params.id, 
-        longURL: urlDatabase[req.params.id] 
+        longURL: urlDatabase[req.params.id].longURL
     };
     res.render("urls_show", templateVars);
 });
@@ -63,7 +69,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-    const longURL = urlDatabase[req.params.id];
+    const longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
 });
 
@@ -98,14 +104,14 @@ app.post("/urls", (req, res) => {
             return;
         }
     }
-    urlDatabase[generateRandomString()] = req.body.longURL;
+    urlDatabase[generateRandomString()].longURL = req.body.longURL;
     console.log(req.body); // Log the POST request body to the console
     res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
     if(req.params.id in urlDatabase){
-        urlDatabase[req.params.id] = req.body.longURL;
+        urlDatabase[req.params.id].longURL = req.body.longURL;
     }
 
     res.redirect("/urls");
