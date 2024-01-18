@@ -59,10 +59,22 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+    if(req.headers.cookie != undefined){
+        if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
+            res.redirect("urls");
+            return;
+        }
+    }
     res.render("register");
 });
 
 app.get("/login", (req, res) => {
+    if(req.headers.cookie != undefined){
+        if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
+            res.redirect("urls");
+            return;
+        }
+    }
     res.render("login");
 });
 
@@ -103,7 +115,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-    console.log(req.body.username);
+    console.log(req.body.user_id);
     res.clearCookie("user_id").redirect("/login");
 });
 
