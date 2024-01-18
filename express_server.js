@@ -62,6 +62,10 @@ app.get("/register", (req, res) => {
     res.render("register");
 });
 
+app.get("/login", (req, res) => {
+    res.render("login");
+});
+
 app.post("/urls", (req, res) => {
     urlDatabase[generateRandomString()] = req.body.longURL;
     console.log(req.body); // Log the POST request body to the console
