@@ -1,4 +1,4 @@
-const helpers = require('./helpers');
+const getUserByEmail = require('./helpers');
 const express = require("express");
 var cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
@@ -41,20 +41,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    // console.log(req.headers.cookie.split('=')[1])
-    // console.log(users)
     const templateVars = {
       user: undefined,
       urls: undefined
     };
     if(req.session.user_id != undefined){
-        console.log(users[req.session.user_id]);
         templateVars["user"] = users[req.session.user_id];
         templateVars["urls"] = urlsForUser(req.session.user_id);
     }
-
-    console.log("Send to urls")
-    console.log(templateVars)
     res.render("urls_index", templateVars);
 });
 
@@ -135,7 +129,6 @@ app.post("/urls", (req, res) => {
     urlDatabase[url_id] = {};
     urlDatabase[url_id].longURL = req.body.longURL;
     urlDatabase[url_id].userID = req.session.user_id;
-    console.log(req.body); // Log the POST request body to the console
     res.redirect("/urls");
 });
 
@@ -186,11 +179,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    console.log(req.body.email);
-    console.log(req.body.password);
-
-    const user = helpers(req.body.email, users);
-    console.log(user);
+    const user = getUserByEmail(req.body.email, users);
     if(user == false){
         //userContainEmail return false if the user does not exist
         res.status(403).send("Does not exist user that registered with the email, please try another email.");
@@ -203,18 +192,15 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-    console.log(req.body.user_id);
     req.session['user_id'] = null;
     res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
-    console.log(req);
-    //console.log(req.body.password);
     if(req.body.email.length == 0 || req.body.password.length == 0){
         res.status(400).send("email and passwords are required fields");
         return;
-    }else if(helpers(req.body.email, users)){
+    }else if(getUserByEmail(req.body.email, users)){
         //userContainEmail will return the user object if exist
         //In that case, return as the user already exist.
         return
@@ -226,7 +212,6 @@ app.post("/register", (req, res) => {
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       }
-    console.log(users);
     req.session.user_id = user_id;
     res.redirect("/urls");
 });
@@ -246,15 +231,11 @@ const generateRandomString = function() {
 
 const urlsForUser = function(id){
     const result = {};
-    console.log("urlsForUser:")
     for(const item in urlDatabase){
-        console.log(urlDatabase[item]);
-        console.log(id);
         if(urlDatabase[item].userID == id){
             result[item] = urlDatabase[item];
         }
     }
-    console.log(result);
     return result;
 }
 
