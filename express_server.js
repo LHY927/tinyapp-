@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-var cookies = require("cookie-parser");
 const PORT = 8080;
 
 app.set("view engine", "ejs");
@@ -11,18 +10,28 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+    AAXA4n: {
+      id: "AAXA4n",
+      email: "user@example.com",
+      password: "purple-monkey-dinosaur",
+    }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-    //console.log(req.headers.cookie.split('=')[1])
+    console.log(req.headers.cookie.split('=')[1])
+    console.log(users)
     const templateVars = {
-      username: undefined,
+      user: undefined,
       urls: urlDatabase
     };
     if(req.headers.cookie != undefined){
-        templateVars["username"] = req.headers.cookie.split('=')[1];
+        console.log(users[req.headers.cookie.split('=')[1]]);
+        templateVars["user"] = users[req.headers.cookie.split('=')[1]];
     }
     res.render("urls_index", templateVars);
 });
@@ -74,13 +83,26 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    console.log(req.body.username)
+    console.log(req.body.username);
     res.cookie("username", req.body.username).redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-    console.log(req.body.username)
+    console.log(req.body.username);
     res.clearCookie("username").redirect("/urls");
+});
+
+app.post("/register", (req, res) => {
+    console.log(req.body.email);
+    console.log(req.body.password);
+    const user_id = generateRandomString();
+    users[user_id] = {
+        id: user_id,
+        email: req.body.email,
+        password: req.body.password
+      }
+    console.log(users);
+    res.cookie("user_id", user_id).redirect("/urls");
 });
 
 function generateRandomString() {
