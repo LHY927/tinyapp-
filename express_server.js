@@ -37,6 +37,12 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+    if(req.headers.cookie != undefined){
+        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+            res.redirect("/login");
+            return;
+        }
+    }
     res.render("urls_new");
 });
 
@@ -61,7 +67,7 @@ app.get("/hello", (req, res) => {
 app.get("/register", (req, res) => {
     if(req.headers.cookie != undefined){
         if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
-            res.redirect("urls");
+            res.redirect("/urls");
             return;
         }
     }
@@ -71,7 +77,7 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
     if(req.headers.cookie != undefined){
         if (typeof users[req.headers.cookie.split('=')[1]] != 'undefined'){
-            res.redirect("urls");
+            res.redirect("/urls");
             return;
         }
     }
@@ -79,6 +85,12 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+    if(req.headers.cookie != undefined){
+        if (typeof users[req.headers.cookie.split('=')[1]] == 'undefined'){
+            res.status(403).send("Please login to shorten URLs.");
+            return;
+        }
+    }
     urlDatabase[generateRandomString()] = req.body.longURL;
     console.log(req.body); // Log the POST request body to the console
     res.redirect("/urls");
