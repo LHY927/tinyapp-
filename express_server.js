@@ -93,6 +93,7 @@ app.post("/login", (req, res) => {
     const user = usersContainEmail(req.body.email);
     console.log(user);
     if(user == false){
+        //userContainEmail return false if the user does not exist
         res.status(403).send("Does not exist user that registered with the email, please try another email.");
     }else if(user["password"] != req.body.password){
         res.status(403).send("Password does not match.");
@@ -113,6 +114,8 @@ app.post("/register", (req, res) => {
         res.status(400).send("email and passwords are required fields");
         return;
     }else if(usersContainEmail(req.body.email)){
+        //userContainEmail will return the user object if exist
+        //In that case, return as the user already exist.
         return
     }
     
@@ -142,9 +145,11 @@ function generateRandomString() {
 function usersContainEmail(email){
     for(const user in users){
         if(email == users[user].email){
+            //return the user object if found
             return users[user];
         }
     }
+    //return false if not found
     return false;
 }
 
