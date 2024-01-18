@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -174,7 +175,7 @@ app.post("/urls/:id/delete", (req, res) => {
         res.status(400).send("id does not exist");
         return;
     }
-    
+
     res.redirect("/urls");
 });
 
@@ -187,7 +188,7 @@ app.post("/login", (req, res) => {
     if(user == false){
         //userContainEmail return false if the user does not exist
         res.status(403).send("Does not exist user that registered with the email, please try another email.");
-    }else if(user["password"] != req.body.password){
+    }else if(!bcrypt.compareSync(req.body.password, user["password"])){
         res.status(403).send("Password does not match.");
     }else{
         res.cookie("user_id", user.id).redirect("/urls");
@@ -215,7 +216,7 @@ app.post("/register", (req, res) => {
     users[user_id] = {
         id: user_id,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
       }
     console.log(users);
     res.cookie("user_id", user_id).redirect("/urls");
