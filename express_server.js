@@ -10,12 +10,29 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+    AAXA4n: {
+      id: "AAXA4n",
+      email: "user@example.com",
+      password: "purple-monkey-dinosaur",
+    }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-    const templateVars = { urls: urlDatabase };
+    // console.log(req.headers.cookie.split('=')[1])
+    // console.log(users)
+    const templateVars = {
+      user: undefined,
+      urls: urlDatabase
+    };
+    if(req.headers.cookie != undefined){
+        console.log(users[req.headers.cookie.split('=')[1]]);
+        templateVars["user"] = users[req.headers.cookie.split('=')[1]];
+    }
     res.render("urls_index", templateVars);
 });
 
@@ -41,6 +58,14 @@ app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/register", (req, res) => {
+    res.render("register");
+});
+
+app.get("/login", (req, res) => {
+    res.render("login");
+});
+
 app.post("/urls", (req, res) => {
     urlDatabase[generateRandomString()] = req.body.longURL;
     console.log(req.body); // Log the POST request body to the console
@@ -48,8 +73,6 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-    console.log(req.params.id)
-    console.log(req.params.id in urlDatabase)
     if(req.params.id in urlDatabase){
         urlDatabase[req.params.id] = req.body.longURL;
     }
@@ -57,12 +80,50 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-    console.log(req.params.id)
-    console.log(req.params.id in urlDatabase)
     if(req.params.id in urlDatabase){
         delete urlDatabase[req.params.id];
     }
     res.redirect("/urls");
+});
+
+app.post("/login", (req, res) => {
+    console.log(req.body.email);
+    console.log(req.body.password);
+
+    const user = usersContainEmail(req.body.email);
+    console.log(user);
+    if(user == false){
+        res.status(403).send("Does not exist user that registered with the email, please try another email.");
+    }else if(user["password"] != req.body.password){
+        res.status(403).send("Password does not match.");
+    }else{
+        res.cookie("user_id", user.id).redirect("/urls");
+    }
+});
+
+app.post("/logout", (req, res) => {
+    console.log(req.body.username);
+    res.clearCookie("user_id").redirect("/login");
+});
+
+app.post("/register", (req, res) => {
+    console.log(req.body.email);
+    console.log(req.body.password);
+    if(req.body.email.length == 0 || req.body.password.length == 0){
+        res.status(400).send("email and passwords are required fields");
+        return;
+    }else if(usersContainEmail(req.body.email)){
+        return
+    }
+    
+    const user_id = generateRandomString();
+    users[user_id] = {
+        id: user_id,
+        email: req.body.email,
+        password: req.body.password
+      }
+    console.log(users);
+    res.cookie("user_id", user_id).redirect("/urls");
 });
 
 function generateRandomString() {
@@ -76,6 +137,15 @@ function generateRandomString() {
       counter += 1;
     }
     return result;
+}
+
+function usersContainEmail(email){
+    for(const user in users){
+        if(email == users[user].email){
+            return users[user];
+        }
+    }
+    return false;
 }
 
 app.listen(PORT, () => {
