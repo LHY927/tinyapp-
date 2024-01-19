@@ -209,7 +209,8 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-    req.session['user_id'] = null;
+    res.clearCookie("session");
+    res.clearCookie("session.sig");
     res.redirect("/login");
 });
 
