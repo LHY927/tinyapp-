@@ -17,10 +17,10 @@
     <title>TinyApp</title>
   </head>
   <body>
+    <%- include('partials/_header') %>
     <main style="margin: 1em;">
       <h3>Registration</h3>
       <form action="/register" method="POST">
-        <a class="nav-item nav-link" href="/login">login</a>
         <label for="email">Email:</label>
         <input
             type="email"
