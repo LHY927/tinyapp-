@@ -221,6 +221,7 @@ app.post("/register", (req, res) => {
     }else if(getUserByEmail(req.body.email, users)){
         //userContainEmail will return the user object if exist
         //In that case, return as the user already exist.
+        res.status(400).send("user email exist, please try another one.");
         return
     }
     
