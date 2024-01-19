@@ -37,7 +37,11 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+    if(req.session.user_id != undefined){
+        res.redirect("/urls");
+    }else{
+        res.redirect("/login");
+    }
 });
 
 app.get("/urls", (req, res) => {
