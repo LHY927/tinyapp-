@@ -133,7 +133,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[url_id] = {};
     urlDatabase[url_id].longURL = req.body.longURL;
     urlDatabase[url_id].userID = req.session.user_id;
-    res.redirect("/urls");
+    res.redirect("/urls/" + url_id);
 });
 
 app.post("/urls/:id", (req, res) => {
