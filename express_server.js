@@ -1,4 +1,4 @@
-const getUserByEmail = require('./helpers');
+const {getUserByEmail, generateRandomString, urlsForUser} = require('./helpers');
 const express = require("express");
 var cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
@@ -51,7 +51,7 @@ app.get("/urls", (req, res) => {
     };
     if(req.session.user_id != undefined){
         templateVars["user"] = users[req.session.user_id];
-        templateVars["urls"] = urlsForUser(req.session.user_id);
+        templateVars["urls"] = urlsForUser(req.session.user_id, urlDatabase);
     }
     res.render("urls_index", templateVars);
 });
@@ -70,7 +70,7 @@ app.get("/urls/new", (req, res) => {
       };
     if(req.session.user_id != undefined){
         templateVars["user"] = users[req.session.user_id];
-        templateVars["urls"] = urlsForUser(req.session.user_id);
+        templateVars["urls"] = urlsForUser(req.session.user_id, urlDatabase);
     }
     res.render("urls_new", templateVars);
 });
@@ -234,29 +234,6 @@ app.post("/register", (req, res) => {
     req.session.user_id = user_id;
     res.redirect("/urls");
 });
-
-const generateRandomString = function() {
-    const length = 6;
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-}
-
-const urlsForUser = function(id){
-    const result = {};
-    for(const item in urlDatabase){
-        if(urlDatabase[item].userID == id){
-            result[item] = urlDatabase[item];
-        }
-    }
-    return result;
-}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
