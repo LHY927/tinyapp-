@@ -63,7 +63,16 @@ app.get("/urls/new", (req, res) => {
             return;
         }
     }
-    res.render("urls_new");
+
+    const templateVars = {
+        user: undefined,
+        urls: undefined
+      };
+    if(req.session.user_id != undefined){
+        templateVars["user"] = users[req.session.user_id];
+        templateVars["urls"] = urlsForUser(req.session.user_id);
+    }
+    res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -83,9 +92,13 @@ app.get("/urls/:id", (req, res) => {
     }
 
     const templateVars = { 
+        user: undefined,
         id: req.params.id, 
         longURL: urlDatabase[req.params.id].longURL
     };
+    if(req.session.user_id != undefined){
+        templateVars["user"] = users[req.session.user_id];
+    }
     res.render("urls_show", templateVars);
 });
 
