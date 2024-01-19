@@ -12,6 +12,7 @@
 
   <body>
     <%- include('partials/_header') %>
+    <% if (typeof user != 'undefined') { %>
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -35,6 +36,9 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
       </div>
+      <% } else { %>
+        <p>Please login to view URLs</p>
+      <% } %>
     </div>
     <!-- Bootstrap JS -->
     <script
